@@ -64,6 +64,18 @@ class TimerTask {
   factory TimerTask.fromJson(Map<String, dynamic> json) =>
       _$TimerTaskFromJson(json);
   Map<String, dynamic> toJson() => _$TimerTaskToJson(this);
+
+  bool poll(DateTime now) {
+    if (_nextTime == null) {
+      print("_nextTime == null, ${toString()}");
+    } else {
+      print("_nextTime != null, ${toString()}");
+    }
+    return false;
+  }
+
+  @JsonKey(ignore: true)
+  DateTime? _nextTime;
 }
 
 typedef OnConfigReadyCallback = void Function();
@@ -131,5 +143,12 @@ class Config {
       print("onReady, _readyCallback $key");
       value();
     });
+  }
+
+  void pollTasks() {
+    DateTime now = DateTime.now();
+    for (var element in tasks) {
+      element.poll(now);
+    }
   }
 }
