@@ -47,10 +47,16 @@ class _MainState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
+    Config().registerCallback("_MainState", () {
+      setState(
+        () {},
+      );
+    });
   }
 
   @override
   void dispose() {
+    Config().unregisterCallback("_MainState");
     super.dispose();
   }
 
