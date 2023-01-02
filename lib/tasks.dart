@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'dart:async';
 part 'tasks.g.dart';
 
 enum TimerType {
@@ -67,11 +68,64 @@ class TimerTask {
 
   bool poll(DateTime now) {
     if (_nextTime == null) {
-      print("_nextTime == null, ${toString()}");
-    } else {
-      print("_nextTime != null, ${toString()}");
+      _updateNextTime(now);
+    }
+    if (_nextTime == null) {
+      return false;
+    }
+    if (now.isAfter(_nextTime!)) {
+      _nextTime = null;
+      print("[$now] TIMEOUT! ${toString()}");
+      return true;
     }
     return false;
+  }
+
+  void _updateNextTime(DateTime now) {
+    _nextTime = null;
+    switch (type) {
+      case TimerType.single:
+        _nextTime = DateTime.parse(timerTime);
+        if (now.isAfter(_nextTime!)) {
+          _nextTime = null;
+        }
+        break;
+      case TimerType.daily:
+        _nextTime = DateTime.parse(timerTime);
+        _nextTime = DateTime(now.year, now.month, now.day, _nextTime!.hour,
+            _nextTime!.minute, _nextTime!.second);
+        if (_nextTime!.isBefore(now)) {
+          _nextTime = _nextTime!.add(const Duration(days: 1));
+        }
+        break;
+      case TimerType.weekDaily:
+        for (int i = 0; i < 8; ++i) {
+          DateTime tmp = now.add(Duration(days: i));
+          if (weekDay.contains(tmp.weekday)) {
+            _nextTime = DateTime.parse(timerTime);
+            _nextTime = DateTime(tmp.year, tmp.month, tmp.day, _nextTime!.hour,
+                _nextTime!.minute, _nextTime!.second);
+            break;
+          }
+        }
+        break;
+      case TimerType.interval:
+        if (interval <= 0 || setTime.isEmpty) {
+          break;
+        }
+        int nowStamp = now.millisecondsSinceEpoch ~/ 1000;
+        DateTime start = DateTime.parse(setTime);
+        int startStamp = start.millisecondsSinceEpoch ~/ 1000;
+        int distance = nowStamp - startStamp;
+        int left = interval - (distance % interval);
+        _nextTime = now.add(Duration(seconds: left));
+        break;
+    }
+    if (_nextTime == null) {
+      print("_updateNextTime failed, type=$type");
+    } else {
+      print("_updateNextTime over, type=$type, _nextTime=$_nextTime");
+    }
   }
 
   @JsonKey(ignore: true)
@@ -114,6 +168,7 @@ class Config {
       print("loading config from file over: ${toString()}");
       onReady();
     });
+    startTimer();
   }
 
   @override
@@ -147,8 +202,17 @@ class Config {
 
   void pollTasks() {
     DateTime now = DateTime.now();
+    print("pollTasks: ${now}");
     for (var element in tasks) {
       element.poll(now);
     }
+  }
+
+  void startTimer() {
+    Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (ready) {
+        pollTasks();
+      }
+    });
   }
 }
