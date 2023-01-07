@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:async';
+import 'notify.dart';
 part 'tasks.g.dart';
 
 enum TimerType {
@@ -76,6 +77,7 @@ class TimerTask {
     if (now.isAfter(_nextTime!)) {
       _nextTime = null;
       print("[$now] TIMEOUT! ${toString()}");
+      Notifier().ShowNotification("TIMEOUT", toString());
       return true;
     }
     return false;
@@ -168,6 +170,7 @@ class Config {
       print("loading config from file over: ${toString()}");
       onReady();
     });
+    Notifier();
     startTimer();
   }
 
