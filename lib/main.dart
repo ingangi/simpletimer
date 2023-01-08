@@ -1,23 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:bitsdojo_window/bitsdojo_window.dart';
-import 'package:platform_info/platform_info.dart';
+// import 'package:bitsdojo_window/bitsdojo_window.dart';
+// import 'package:platform_info/platform_info.dart';
 import 'package:getwidget/getwidget.dart';
 import 'tasks.dart';
+import 'package:window_manager/window_manager.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await windowManager.ensureInitialized();
+
+  WindowOptions windowOptions = const WindowOptions(
+    size: Size(800, 600),
+    center: true,
+    backgroundColor: Colors.transparent,
+    skipTaskbar: false,
+    titleBarStyle: TitleBarStyle.hidden,
+  );
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.show();
+    await windowManager.focus();
+  });
+
   Config();
   runApp(const SimpleTimer());
-  print(Platform.instance.version);
-  if (Platform.I.isMacOS || Platform.I.isWindows) {
-    print("platform is desktop will resize window");
-    doWhenWindowReady(() {
-      appWindow.minSize = const Size(400, 200);
-      appWindow.size = const Size(800, 600);
-      appWindow.alignment = Alignment.center;
-      appWindow.show();
-    });
-  }
+  // print(Platform.instance.version);
+  // if (Platform.I.isMacOS || Platform.I.isWindows) {
+  //   print("platform is desktop will resize window");
+  //   doWhenWindowReady(() {
+  //     appWindow.minSize = const Size(400, 200);
+  //     appWindow.size = const Size(800, 600);
+  //     appWindow.alignment = Alignment.center;
+  //     appWindow.show();
+  //   });
+  // }
 }
 
 class SimpleTimer extends StatelessWidget {
@@ -43,9 +58,11 @@ class MainPage extends StatefulWidget {
   State<StatefulWidget> createState() => _MainState();
 }
 
-class _MainState extends State<MainPage> {
+class _MainState extends State<MainPage> with WindowListener {
   @override
   void initState() {
+    windowManager.addListener(this);
+    windowManager.setPreventClose(true);
     super.initState();
     Config().registerCallback("_MainState", () {
       setState(
@@ -56,6 +73,7 @@ class _MainState extends State<MainPage> {
 
   @override
   void dispose() {
+    windowManager.removeListener(this);
     Config().unregisterCallback("_MainState");
     super.dispose();
   }
@@ -79,6 +97,17 @@ class _MainState extends State<MainPage> {
     setState(() {
       Config().tasks.add(TimerTask("New Timer", "Not set"));
     });
+  }
+
+  @override
+  void onWindowEvent(String eventName) {
+    print('[WindowManager] onWindowEvent: $eventName');
+  }
+
+  @override
+  void onWindowClose() {
+    print('[onWindowClose] onWindowClose');
+    windowManager.minimize();
   }
 
   @override

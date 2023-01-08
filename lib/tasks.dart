@@ -77,7 +77,7 @@ class TimerTask {
     if (now.isAfter(_nextTime!)) {
       _nextTime = null;
       print("[$now] TIMEOUT! ${toString()}");
-      Notifier().ShowNotification("TIMEOUT", toString());
+      Notifier().ShowNotification(title, "It's time for $title");
       return true;
     }
     return false;
