@@ -9,6 +9,8 @@ enum TimerType {
   single, // a single timepoint
   daily, // daily timer
   weekDaily, // week day timer
+  monthly, // month day timer
+  yearly, // year day timer
   interval, // repeat after some interval
 }
 
@@ -110,6 +112,30 @@ class TimerTask {
             break;
           }
         }
+        break;
+      case TimerType.monthly:
+        _nextTime = DateTime.parse(timerTime);
+        _nextTime = DateTime(
+            now.year,
+            now.month,
+            _nextTime!.day,
+            _nextTime!.hour,
+            _nextTime!.minute,
+            _nextTime!.second); // todo: the day 31 not exist?
+        if (now.isBefore(_nextTime!) || now == _nextTime) {
+          // nothing to change
+
+        } else {
+          if (now.month == 12) {
+            _nextTime = DateTime(now.year + 1, 1, _nextTime!.day,
+                _nextTime!.hour, _nextTime!.minute, _nextTime!.second);
+          } else {
+            _nextTime = DateTime(now.year, now.month + 1, _nextTime!.day,
+                _nextTime!.hour, _nextTime!.minute, _nextTime!.second);
+          }
+        }
+        break;
+      case TimerType.yearly: // todo
         break;
       case TimerType.interval:
         if (interval <= 0 || setTime.isEmpty) {
