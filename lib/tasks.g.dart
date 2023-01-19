@@ -45,6 +45,8 @@ const _$TimerTypeEnumMap = {
   TimerType.single: 'single',
   TimerType.daily: 'daily',
   TimerType.weekDaily: 'weekDaily',
+  TimerType.monthly: 'monthly',
+  TimerType.yearly: 'yearly',
   TimerType.interval: 'interval',
 };
 

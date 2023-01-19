@@ -14,6 +14,13 @@ enum TimerType {
   interval, // repeat after some interval
 }
 
+int monthDayCount(int year, int month) {
+  if (month < 1 || month > 12) {
+    return 0;
+  }
+  return DateTime(year, month + 1, 0).day;
+}
+
 // {
 //     "title":"Call Boss",
 //     "desc":"",
@@ -115,13 +122,21 @@ class TimerTask {
         break;
       case TimerType.monthly:
         _nextTime = DateTime.parse(timerTime);
-        _nextTime = DateTime(
-            now.year,
-            now.month,
-            _nextTime!.day,
-            _nextTime!.hour,
-            _nextTime!.minute,
-            _nextTime!.second); // todo: the day 31 not exist?
+        if (_nextTime!.day > 31 || _nextTime!.day < 1) {
+          _nextTime = null;
+          break;
+        }
+        DateTime tmp = now;
+        if (_nextTime!.day > monthDayCount(now.year, now.month)) {
+          while (true) {
+            tmp = tmp.add(const Duration(days: 28));
+            if (tmp.day <= monthDayCount(tmp.year, tmp.month)) {
+              break;
+            }
+          }
+        }
+        _nextTime = DateTime(tmp.year, tmp.month, _nextTime!.day,
+            _nextTime!.hour, _nextTime!.minute, _nextTime!.second);
         if (now.isBefore(_nextTime!) || now == _nextTime) {
           // nothing to change
 
