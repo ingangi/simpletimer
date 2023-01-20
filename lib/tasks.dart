@@ -121,34 +121,40 @@ class TimerTask {
         }
         break;
       case TimerType.monthly:
+        now = DateTime(now.year, now.month + 1);
         _nextTime = DateTime.parse(timerTime);
         if (_nextTime!.day > 31 || _nextTime!.day < 1) {
           _nextTime = null;
           break;
         }
+        int addNextMonth = 0;
+        if (now.day >= _nextTime!.day) {
+          _nextTime = DateTime(now.year, now.month, _nextTime!.day,
+              _nextTime!.hour, _nextTime!.minute, _nextTime!.second);
+          if (_nextTime!.isBefore(now)) {
+            addNextMonth = 1;
+          }
+        }
         DateTime tmp = now;
-        if (_nextTime!.day > monthDayCount(now.year, now.month)) {
+        int addMonth = 0;
+        if (_nextTime!.day >
+            monthDayCount(now.year, now.month + addNextMonth)) {
           while (true) {
-            tmp = tmp.add(const Duration(days: 28));
-            if (tmp.day <= monthDayCount(tmp.year, tmp.month)) {
+            ++addMonth;
+            tmp = DateTime(
+                now.year, now.month + addNextMonth + addMonth, _nextTime!.day);
+            if (_nextTime!.day <= monthDayCount(tmp.year, tmp.month)) {
               break;
             }
           }
         }
-        _nextTime = DateTime(tmp.year, tmp.month, _nextTime!.day,
-            _nextTime!.hour, _nextTime!.minute, _nextTime!.second);
-        if (now.isBefore(_nextTime!) || now == _nextTime) {
-          // nothing to change
-
-        } else {
-          if (now.month == 12) {
-            _nextTime = DateTime(now.year + 1, 1, _nextTime!.day,
-                _nextTime!.hour, _nextTime!.minute, _nextTime!.second);
-          } else {
-            _nextTime = DateTime(now.year, now.month + 1, _nextTime!.day,
-                _nextTime!.hour, _nextTime!.minute, _nextTime!.second);
-          }
-        }
+        _nextTime = DateTime(
+            now.year,
+            now.month + addNextMonth + addMonth,
+            _nextTime!.day,
+            _nextTime!.hour,
+            _nextTime!.minute,
+            _nextTime!.second);
         break;
       case TimerType.yearly: // todo
         break;
