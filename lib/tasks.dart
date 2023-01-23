@@ -116,6 +116,10 @@ class TimerTask {
             _nextTime = DateTime.parse(timerTime);
             _nextTime = DateTime(tmp.year, tmp.month, tmp.day, _nextTime!.hour,
                 _nextTime!.minute, _nextTime!.second);
+            if (now.isAfter(_nextTime!)) {
+              _nextTime = null;
+              continue;
+            }
             break;
           }
         }

@@ -116,18 +116,20 @@ class _MainState extends State<MainPage> with WindowListener {
     print("_MainState build with routerParam: ${routerParam}");
     return Scaffold(
       appBar: AppBar(title: const Text('Main')),
-      body: Column(children: [
-        Column(children: GetTaskList()),
-        GFButton(
-          onPressed: AddTask,
-          text: "Add",
-          icon: const Icon(Icons.add),
-          type: GFButtonType.outline,
-          // textColor: Colors.white,
-          // color: Colors.black, //Color(0xFF6E31),
-          // color: Color.fromARGB(0, 0xFF, 0x6E, 0x31),
-        ),
-      ]),
+      body: SingleChildScrollView(
+        child: Column(children: [
+          Column(children: GetTaskList()),
+          GFButton(
+            onPressed: AddTask,
+            text: "Add",
+            icon: const Icon(Icons.add),
+            type: GFButtonType.outline,
+            // textColor: Colors.white,
+            // color: Colors.black, //Color(0xFF6E31),
+            // color: Color.fromARGB(0, 0xFF, 0x6E, 0x31),
+          ),
+        ]),
+      ),
     );
   }
 }
