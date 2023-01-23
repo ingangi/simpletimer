@@ -78,11 +78,11 @@ class _MainState extends State<MainPage> with WindowListener {
     super.dispose();
   }
 
-  List<Widget> GetTaskList() {
+  List<Widget> getTaskList() {
     return Config()
         .tasks
         .map((e) => GFListTile(
-            avatar: GFAvatar(),
+            avatar: const GFAvatar(),
             onTap: () {
               print("tapped");
             },
@@ -92,7 +92,7 @@ class _MainState extends State<MainPage> with WindowListener {
         .toList();
   }
 
-  void AddTask() {
+  void addTask() {
     print("Add Task");
     setState(() {
       Config().tasks.add(TimerTask("New Timer", "Not set"));
@@ -118,9 +118,9 @@ class _MainState extends State<MainPage> with WindowListener {
       appBar: AppBar(title: const Text('Main')),
       body: SingleChildScrollView(
         child: Column(children: [
-          Column(children: GetTaskList()),
+          Column(children: getTaskList()),
           GFButton(
-            onPressed: AddTask,
+            onPressed: addTask,
             text: "Add",
             icon: const Icon(Icons.add),
             type: GFButtonType.outline,
