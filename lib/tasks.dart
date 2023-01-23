@@ -121,12 +121,7 @@ class TimerTask {
         }
         break;
       case TimerType.monthly:
-        now = DateTime(now.year, now.month + 1);
         _nextTime = DateTime.parse(timerTime);
-        if (_nextTime!.day > 31 || _nextTime!.day < 1) {
-          _nextTime = null;
-          break;
-        }
         int addNextMonth = 0;
         if (now.day >= _nextTime!.day) {
           _nextTime = DateTime(now.year, now.month, _nextTime!.day,
@@ -156,7 +151,30 @@ class TimerTask {
             _nextTime!.minute,
             _nextTime!.second);
         break;
-      case TimerType.yearly: // todo
+      case TimerType.yearly:
+        _nextTime = DateTime.parse(timerTime);
+        int setDay = _nextTime!.day;
+        int setMonth = _nextTime!.month;
+        int addNextYear = 0;
+        int addYear = 0;
+        _nextTime = DateTime(now.year, _nextTime!.month, _nextTime!.day,
+            _nextTime!.hour, _nextTime!.minute, _nextTime!.second);
+        if (_nextTime!.isBefore(now)) {
+          addNextYear = 1;
+        }
+        DateTime tmp = DateTime(now.year + addNextYear, setMonth, setDay,
+            _nextTime!.hour, _nextTime!.minute, _nextTime!.second);
+        if (setDay != tmp.day || setMonth != tmp.month) {
+          while (true) {
+            ++addYear;
+            tmp = DateTime(now.year + addNextYear + addYear, setMonth, setDay);
+            if (setDay == tmp.day && setMonth == tmp.month) {
+              break;
+            }
+          }
+        }
+        _nextTime = DateTime(now.year + addNextYear + addYear, setMonth, setDay,
+            _nextTime!.hour, _nextTime!.minute, _nextTime!.second);
         break;
       case TimerType.interval:
         if (interval <= 0 || setTime.isEmpty) {
