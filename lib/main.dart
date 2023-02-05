@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'tasks.dart';
 import 'package:window_manager/window_manager.dart';
+import 'add_task.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,6 +47,7 @@ class SimpleTimer extends StatelessWidget {
           dialogBackgroundColor: Color.fromARGB(0, 0xFF, 0x6E, 0x31)),
       routes: {
         '/main': (context) => const MainPage(),
+        '/task': (context) => const AddTaskDialog(),
       },
       home: const MainPage(),
     );
@@ -94,9 +96,10 @@ class _MainState extends State<MainPage> with WindowListener {
 
   void addTask() {
     print("Add Task");
-    setState(() {
-      Config().tasks.add(TimerTask("New Timer", "Not set"));
-    });
+    Navigator.popAndPushNamed(context, '/task');
+    // setState(() {
+    //   Config().tasks.add(TimerTask("New Timer", "Not set"));
+    // });
   }
 
   @override

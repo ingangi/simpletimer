@@ -1,56 +1,89 @@
 import 'package:flutter/material.dart';
 
-void main() => runApp(MyApp());
+class AddTaskDialog extends StatefulWidget {
+  const AddTaskDialog({super.key});
 
-class MyApp extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: '提醒',
-      home: HomePage(),
-    );
-  }
+  _AddTaskDialogState createState() => _AddTaskDialogState();
 }
 
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  List<Reminder> _reminders = [];
+class _AddTaskDialogState extends State<AddTaskDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _titleController = TextEditingController();
+  DateTime _dateTime = DateTime.now();
+  int _type = 0;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('提醒'),
-      ),
-      body: ListView.builder(
-        itemCount: _reminders.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(_reminders[index].reminder),
-            subtitle: Text(_reminders[index].time),
-            trailing: IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () {
-                setState(() {
-                  _reminders.removeAt(index);
-                });
+    return AlertDialog(
+        title: const Text("Add Reminder"),
+        content: Form(
+          key: _formKey,
+          child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+            TextFormField(
+              controller: _titleController,
+              decoration: InputDecoration(labelText: "Title"),
+              validator: (value) {
+                if (value!.isEmpty) {
+                  // return "Please enter a title";
+                }
+                return null;
               },
             ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => AddReminderPage(),
-          ));
-        },
-      ),
-    );
+            ListTile(
+              title: Text("Type"),
+              trailing: DropdownButton<int>(
+                value: _type,
+                items: const [
+                  DropdownMenuItem(
+                    value: 0,
+                    child: Text("One-time"),
+                  ),
+                  DropdownMenuItem(
+                    value: 1,
+                    child: Text("Daily"),
+                  ),
+                  DropdownMenuItem(
+                    value: 2,
+                    child: Text("Yearly"),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _type = value!;
+                  });
+                },
+              ),
+            ),
+            ListTile(
+              title: Text("Date/Time"),
+              onTap: () async {
+                final dateTime = await showDatePicker(
+                  context: context,
+                  initialDate: _dateTime ?? DateTime.now(),
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime(2100),
+                );
+                if (dateTime != null) {
+                  setState(() {
+                    _dateTime = dateTime;
+                  });
+                }
+              },
+              trailing: Text(_dateTime?.toString() ?? ""),
+            ),
+            const SizedBox(
+              height: 16.0,
+            ),
+            // RaisedButton(
+            //   child: Text("Add"),
+            //   onPressed: () {
+            //     // if (_formKey.currentState.validate()) {
+            //     //   final title = _titleController.text;
+            //     //   final reminder = Reminder(
+            //   },
+            // ),
+          ]),
+        ));
   }
 }
