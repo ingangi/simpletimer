@@ -119,6 +119,7 @@ class _MainState extends State<MainPage> with WindowListener {
     print("_MainState build with routerParam: ${routerParam}");
     return Scaffold(
       appBar: AppBar(title: const Text('Main')),
+      // backgroundColor: Colors.yellow,
       body: SingleChildScrollView(
         child: Column(children: [
           Column(children: getTaskList()),
