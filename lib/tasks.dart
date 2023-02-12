@@ -3,6 +3,8 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:async';
 import 'notify.dart';
+import 'dart:collection';
+import 'package:intl/intl.dart';
 part 'tasks.g.dart';
 
 enum TimerType {
@@ -90,6 +92,74 @@ class TimerTask {
       return true;
     }
     return false;
+  }
+
+  DateTime? _checkExclude(DateTime now) {
+    // print(
+    //     "_checkExclude start($id), $excludePeriod, $excludeDailyTime, $excludeWeekDay");
+    if (excludePeriod.length == 2) {
+      DateTime startTime = DateTime.parse(excludePeriod[0]);
+      DateTime endTime = DateTime.parse(excludePeriod[1]);
+      if (endTime.isAfter(startTime) &&
+          now.isAfter(startTime) &&
+          now.isBefore(endTime)) {
+        now = endTime.add(const Duration(seconds: 1));
+        print(
+            "_checkExclude, now updated to $now for excludePeriod($excludePeriod)");
+      }
+    }
+
+    if (excludeDailyTime.length == 2) {
+      DateTime startTime = DateFormat.Hm().parse(excludeDailyTime[0]);
+      startTime = DateTime(now.year, now.month, now.day, startTime.hour,
+          startTime.minute, startTime.second);
+      DateTime endTime = DateFormat.Hm().parse(excludeDailyTime[1]);
+      endTime = DateTime(now.year, now.month, now.day, endTime.hour,
+          endTime.minute, endTime.second);
+      if (endTime.isBefore(startTime)) {
+        endTime = endTime.add(const Duration(days: 1));
+      }
+      if (startTime.difference(endTime) < const Duration(days: 1)) {
+        if (now.isAfter(startTime) && now.isBefore(endTime)) {
+          now = endTime.add(const Duration(seconds: 1));
+          print(
+              "_checkExclude, now updated to $now for excludeDailyTime($excludeDailyTime)");
+        }
+      } else {
+        print(
+            "_checkExclude, all time exclued by excludeDailyTime($excludeDailyTime)!!!");
+        return null;
+      }
+    }
+
+    if (excludeWeekDay.isNotEmpty) {
+      if (excludeWeekDay.length > 6) {
+        var uniqueIntList = LinkedHashSet<int>.from(excludeWeekDay);
+        uniqueIntList.removeWhere((element) => element > 7 || element < 1);
+        excludeWeekDay = uniqueIntList.toList();
+        if (excludeWeekDay.length > 6) {
+          print(
+              "_checkExclude, all time exclued by excludeWeekDay($excludeWeekDay)!!!");
+          return null;
+        }
+      }
+      if (excludeWeekDay.contains(now.weekday)) {
+        now = now.add(const Duration(days: 1));
+        while (excludeWeekDay.contains(now.weekday)) {
+          now = now.add(const Duration(days: 1));
+        }
+        now = DateTime(now.year, now.month, now.day);
+        print(
+            "_checkExclude, now updated to $now for excludeWeekDay($excludeWeekDay)");
+      }
+      while (excludeWeekDay.contains(now.weekday)) {
+        now = now.add(const Duration(days: 1));
+        print(
+            "_checkExclude, now updated to $now for excludeWeekDay($excludeWeekDay)");
+      }
+    }
+
+    return now;
   }
 
   void _updateNextTime(DateTime now) {
@@ -195,7 +265,18 @@ class TimerTask {
     if (_nextTime == null) {
       print("_updateNextTime failed, type=$type");
     } else {
-      print("_updateNextTime over, type=$type, _nextTime=$_nextTime");
+      var excluded = _checkExclude(_nextTime!);
+      if (excluded == null) {
+        _nextTime = null;
+        print("_updateNextTime failed on _checkExclude, type=$type");
+      } else if (excluded.isAfter(_nextTime!)) {
+        // reproduce
+        print(
+            "_updateNextTime try to reproduce, type=$type, excluded=$excluded");
+        _updateNextTime(excluded);
+      } else {
+        print("_updateNextTime over, type=$type, _nextTime=$_nextTime");
+      }
     }
   }
 
