@@ -97,38 +97,42 @@ class TimerTask {
   DateTime? _checkExclude(DateTime now) {
     // print(
     //     "_checkExclude start($id), $excludePeriod, $excludeDailyTime, $excludeWeekDay");
-    if (excludePeriod.length == 2) {
-      DateTime startTime = DateTime.parse(excludePeriod[0]);
-      DateTime endTime = DateTime.parse(excludePeriod[1]);
-      if (endTime.isAfter(startTime) &&
-          now.isAfter(startTime) &&
-          now.isBefore(endTime)) {
-        now = endTime.add(const Duration(seconds: 1));
-        print(
-            "_checkExclude, now updated to $now for excludePeriod($excludePeriod)");
+    if (excludePeriod.isNotEmpty && excludePeriod.length % 2 == 0) {
+      for (int i = 0; i < excludePeriod.length; i += 2) {
+        DateTime startTime = DateTime.parse(excludePeriod[i]);
+        DateTime endTime = DateTime.parse(excludePeriod[i + 1]);
+        if (endTime.isAfter(startTime) &&
+            now.isAfter(startTime) &&
+            now.isBefore(endTime)) {
+          now = endTime.add(const Duration(seconds: 1));
+          print(
+              "_checkExclude, now updated to $now for excludePeriod($excludePeriod)");
+        }
       }
     }
 
-    if (excludeDailyTime.length == 2) {
-      DateTime startTime = DateFormat.Hm().parse(excludeDailyTime[0]);
-      startTime = DateTime(now.year, now.month, now.day, startTime.hour,
-          startTime.minute, startTime.second);
-      DateTime endTime = DateFormat.Hm().parse(excludeDailyTime[1]);
-      endTime = DateTime(now.year, now.month, now.day, endTime.hour,
-          endTime.minute, endTime.second);
-      if (endTime.isBefore(startTime)) {
-        endTime = endTime.add(const Duration(days: 1));
-      }
-      if (startTime.difference(endTime) < const Duration(days: 1)) {
-        if (now.isAfter(startTime) && now.isBefore(endTime)) {
-          now = endTime.add(const Duration(seconds: 1));
-          print(
-              "_checkExclude, now updated to $now for excludeDailyTime($excludeDailyTime)");
+    if (excludeDailyTime.isNotEmpty && excludeDailyTime.length % 2 == 0) {
+      for (int i = 0; i < excludeDailyTime.length; i += 2) {
+        DateTime startTime = DateFormat.Hm().parse(excludeDailyTime[i]);
+        startTime = DateTime(now.year, now.month, now.day, startTime.hour,
+            startTime.minute, startTime.second);
+        DateTime endTime = DateFormat.Hm().parse(excludeDailyTime[i + 1]);
+        endTime = DateTime(now.year, now.month, now.day, endTime.hour,
+            endTime.minute, endTime.second);
+        if (endTime.isBefore(startTime)) {
+          endTime = endTime.add(const Duration(days: 1));
         }
-      } else {
-        print(
-            "_checkExclude, all time exclued by excludeDailyTime($excludeDailyTime)!!!");
-        return null;
+        if (startTime.difference(endTime) < const Duration(days: 1)) {
+          if (now.isAfter(startTime) && now.isBefore(endTime)) {
+            now = endTime.add(const Duration(seconds: 1));
+            print(
+                "_checkExclude, now updated to $now for excludeDailyTime($excludeDailyTime)");
+          }
+        } else {
+          print(
+              "_checkExclude, all time exclued by excludeDailyTime($excludeDailyTime)!!!");
+          return null;
+        }
       }
     }
 
