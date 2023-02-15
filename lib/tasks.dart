@@ -5,7 +5,7 @@ import 'dart:async';
 import 'notify.dart';
 import 'dart:collection';
 import 'package:intl/intl.dart';
-part 'tasks.g.dart';
+part 'tasks.g.dart'; // update: flutter packages pub run build_runner build
 
 enum TimerType {
   single, // a single timepoint
@@ -14,6 +14,12 @@ enum TimerType {
   monthly, // month day timer
   yearly, // year day timer
   interval, // repeat after some interval
+}
+
+enum TaskState {
+  normal,
+  expired,
+  disabled,
 }
 
 int monthDayCount(int year, int month) {
@@ -45,6 +51,7 @@ class TimerTask {
   String desc = "Default";
 
   TimerType type = TimerType.single;
+  TaskState state = TaskState.normal;
 
   @JsonKey(includeIfNull: false)
   String timerTime = "1970-01-01 08:00:33";
@@ -79,6 +86,9 @@ class TimerTask {
   Map<String, dynamic> toJson() => _$TimerTaskToJson(this);
 
   bool poll(DateTime now) {
+    if (state != TaskState.normal) {
+      return false;
+    }
     if (_nextTime == null) {
       _updateNextTime(now);
     }
@@ -92,6 +102,11 @@ class TimerTask {
       return true;
     }
     return false;
+  }
+
+  void setState(TaskState newState) {
+    print("state change from $state to $newState");
+    state = newState;
   }
 
   DateTime? _checkExclude(DateTime now) {
@@ -173,6 +188,7 @@ class TimerTask {
         _nextTime = DateTime.parse(timerTime);
         if (now.isAfter(_nextTime!)) {
           _nextTime = null;
+          setState(TaskState.expired);
         }
         break;
       case TimerType.daily:

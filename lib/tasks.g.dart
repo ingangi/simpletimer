@@ -11,6 +11,7 @@ TimerTask _$TimerTaskFromJson(Map<String, dynamic> json) => TimerTask(
       json['desc'] as String,
     )
       ..type = $enumDecode(_$TimerTypeEnumMap, json['type'])
+      ..state = $enumDecode(_$TaskStateEnumMap, json['state'])
       ..timerTime = json['timerTime'] as String
       ..setTime = json['setTime'] as String
       ..weekDay =
@@ -31,6 +32,7 @@ Map<String, dynamic> _$TimerTaskToJson(TimerTask instance) => <String, dynamic>{
       'title': instance.title,
       'desc': instance.desc,
       'type': _$TimerTypeEnumMap[instance.type]!,
+      'state': _$TaskStateEnumMap[instance.state]!,
       'timerTime': instance.timerTime,
       'setTime': instance.setTime,
       'weekDay': instance.weekDay,
@@ -48,6 +50,12 @@ const _$TimerTypeEnumMap = {
   TimerType.monthly: 'monthly',
   TimerType.yearly: 'yearly',
   TimerType.interval: 'interval',
+};
+
+const _$TaskStateEnumMap = {
+  TaskState.normal: 'normal',
+  TaskState.expired: 'expired',
+  TaskState.disabled: 'disabled',
 };
 
 Config _$ConfigFromJson(Map<String, dynamic> json) => Config()
