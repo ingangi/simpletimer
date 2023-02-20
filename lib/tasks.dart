@@ -112,6 +112,7 @@ class TimerTask {
   DateTime? _checkExclude(DateTime now) {
     // print(
     //     "_checkExclude start($id), $excludePeriod, $excludeDailyTime, $excludeWeekDay");
+    bool changed = false;
     if (excludePeriod.isNotEmpty && excludePeriod.length % 2 == 0) {
       for (int i = 0; i < excludePeriod.length; i += 2) {
         DateTime startTime = DateTime.parse(excludePeriod[i]);
@@ -120,6 +121,7 @@ class TimerTask {
             now.isAfter(startTime) &&
             now.isBefore(endTime)) {
           now = endTime.add(const Duration(seconds: 1));
+          changed = true;
           print(
               "_checkExclude, now updated to $now for excludePeriod($excludePeriod)");
         }
@@ -135,11 +137,16 @@ class TimerTask {
         endTime = DateTime(now.year, now.month, now.day, endTime.hour,
             endTime.minute, endTime.second);
         if (endTime.isBefore(startTime)) {
-          endTime = endTime.add(const Duration(days: 1));
+          if (now.isBefore(startTime)) {
+            startTime = startTime.add(const Duration(days: -1));
+          } else {
+            endTime = endTime.add(const Duration(days: 1));
+          }
         }
         if (startTime.difference(endTime) < const Duration(days: 1)) {
           if (now.isAfter(startTime) && now.isBefore(endTime)) {
             now = endTime.add(const Duration(seconds: 1));
+            changed = true;
             print(
                 "_checkExclude, now updated to $now for excludeDailyTime($excludeDailyTime)");
           }
@@ -168,16 +175,24 @@ class TimerTask {
           now = now.add(const Duration(days: 1));
         }
         now = DateTime(now.year, now.month, now.day);
+        changed = true;
         print(
             "_checkExclude, now updated to $now for excludeWeekDay($excludeWeekDay)");
       }
       while (excludeWeekDay.contains(now.weekday)) {
         now = now.add(const Duration(days: 1));
+        changed = true;
         print(
             "_checkExclude, now updated to $now for excludeWeekDay($excludeWeekDay)");
       }
     }
 
+    if (changed) {
+      DateTime? tmpNow = _checkExclude(now);
+      if (tmpNow != null && tmpNow != now) {
+        return _checkExclude(tmpNow);
+      }
+    }
     return now;
   }
 
@@ -375,7 +390,7 @@ class Config {
 
   void pollTasks() {
     DateTime now = DateTime.now();
-    print("pollTasks: ${now}");
+    // print("pollTasks: ${now}");
     for (var element in tasks) {
       element.poll(now);
     }
