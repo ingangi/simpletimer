@@ -43,8 +43,8 @@ class SimpleTimer extends StatelessWidget {
     return MaterialApp(
       title: 'Simple Timer',
       theme: ThemeData(
-          primaryColor: Color.fromARGB(0, 0x24, 0x37, 0x63),
-          dialogBackgroundColor: Color.fromARGB(0, 0xFF, 0x6E, 0x31)),
+          primaryColor: const Color.fromARGB(0, 0x24, 0x37, 0x63),
+          dialogBackgroundColor: const Color.fromARGB(0, 0xFF, 0x6E, 0x31)),
       routes: {
         '/main': (context) => const MainPage(),
         '/task': (context) => const AddTaskDialog(),
@@ -82,15 +82,26 @@ class _MainState extends State<MainPage> with WindowListener {
 
   List<Widget> getTaskList() {
     return Config()
-        .tasks
+        .getSortedTaskList()
         .map((e) => GFListTile(
             avatar: const GFAvatar(),
             onTap: () {
               print("tapped");
             },
             titleText: e.title,
-            subTitleText: e.desc,
-            icon: Icon(Icons.favorite)))
+            padding: const EdgeInsets.all(8),
+            margin: const EdgeInsets.symmetric(vertical: 1, horizontal: 2),
+            subTitleText:
+                e.state != TaskState.normal ? "Disabled or Expired" : "",
+            // title: Text("tile"),
+            // subTitle: Text("subTitle"),
+            description: e.state == TaskState.normal
+                ? Text(e.countingDown)
+                : const Text(""),
+            color: e.state == TaskState.normal
+                ? const Color.fromARGB(255, 144, 238, 144)
+                : Colors.grey[700],
+            icon: const Icon(Icons.favorite)))
         .toList();
   }
 
@@ -116,7 +127,7 @@ class _MainState extends State<MainPage> with WindowListener {
   @override
   Widget build(BuildContext context) {
     var routerParam = ModalRoute.of(context)?.settings.arguments;
-    print("_MainState build with routerParam: ${routerParam}");
+    // print("_MainState build with routerParam: ${routerParam}");
     return Scaffold(
       appBar: AppBar(title: const Text('Main')),
       // backgroundColor: Colors.yellow,

@@ -109,6 +109,28 @@ class TimerTask {
     state = newState;
   }
 
+  Duration countDown() {
+    DateTime now = DateTime.now();
+    if (state != TaskState.normal) {
+      return const Duration(days: 36501);
+    }
+    if (_nextTime == null) {
+      return const Duration(days: 36500);
+    }
+    return _nextTime!.difference(now);
+  }
+
+  Duration updateCountDown() {
+    Duration duration = countDown();
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    countingDown =
+        "${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
+    leftDuration = duration;
+    return duration;
+  }
+
   DateTime? _checkExclude(DateTime now) {
     // print(
     //     "_checkExclude start($id), $excludePeriod, $excludeDailyTime, $excludeWeekDay");
@@ -317,6 +339,10 @@ class TimerTask {
 
   @JsonKey(ignore: true)
   DateTime? _nextTime;
+  @JsonKey(ignore: true)
+  String countingDown = "";
+  @JsonKey(ignore: true)
+  Duration leftDuration = const Duration(hours: 100);
 }
 
 typedef OnConfigReadyCallback = void Function();
@@ -345,6 +371,11 @@ class Config {
 
   factory Config() {
     return _singleton;
+  }
+
+  List<TimerTask> getSortedTaskList() {
+    tasks.sort((a, b) => a.leftDuration.compareTo(b.leftDuration));
+    return tasks;
   }
 
   Config._internal() {
@@ -393,7 +424,13 @@ class Config {
     // print("pollTasks: ${now}");
     for (var element in tasks) {
       element.poll(now);
+      element.updateCountDown();
     }
+
+    _readyCallback.forEach((key, value) {
+      // print("onReady, _readyCallback $key");
+      value();
+    });
   }
 
   void startTimer() {
