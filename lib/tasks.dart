@@ -311,11 +311,12 @@ class TimerTask {
         if (interval <= 0 || setTime.isEmpty) {
           break;
         }
-        int nowStamp = now.millisecondsSinceEpoch ~/ 1000;
-        DateTime start = DateTime.parse(setTime);
-        int startStamp = start.millisecondsSinceEpoch ~/ 1000;
-        int distance = nowStamp - startStamp;
-        int left = interval - (distance % interval);
+        // int nowStamp = now.millisecondsSinceEpoch ~/ 1000;
+        // DateTime start = DateTime.parse(setTime);
+        // int startStamp = start.millisecondsSinceEpoch ~/ 1000;
+        // int distance = nowStamp - startStamp;
+        // int left = interval - (distance % interval);
+        int left = interval;
         _nextTime = now.add(Duration(seconds: left));
         break;
     }
