@@ -375,7 +375,18 @@ class Config {
   }
 
   List<TimerTask> getSortedTaskList() {
-    tasks.sort((a, b) => a.leftDuration.compareTo(b.leftDuration));
+    tasks.sort((a, b) {
+      if (a.leftDuration.inSeconds > b.leftDuration.inSeconds) {
+        return 1;
+      }
+      if (a.leftDuration.inSeconds < b.leftDuration.inSeconds) {
+        return -1;
+      }
+      if (a.id >= b.id) {
+        return -1;
+      }
+      return 1;
+    });
     return tasks;
   }
 
