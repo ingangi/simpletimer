@@ -218,8 +218,13 @@ class TimerTask {
     return now;
   }
 
-  void _updateNextTime(DateTime now) {
+  void _updateNextTime(DateTime now, [int recur = 0]) {
+    recur++;
     _nextTime = null;
+    if (recur > 1000) {
+      setState(TaskState.expired);
+      return;
+    }
     switch (type) {
       case TimerType.single:
         _nextTime = DateTime.parse(timerTime);
@@ -321,19 +326,21 @@ class TimerTask {
         break;
     }
     if (_nextTime == null) {
-      print("_updateNextTime failed, type=$type");
+      print("_updateNextTime failed, type=$type, recur=$recur");
     } else {
       var excluded = _checkExclude(_nextTime!);
       if (excluded == null) {
         _nextTime = null;
-        print("_updateNextTime failed on _checkExclude, type=$type");
+        print(
+            "_updateNextTime failed on _checkExclude, type=$type, recur=$recur");
       } else if (excluded.isAfter(_nextTime!)) {
         // reproduce
         print(
-            "_updateNextTime try to reproduce, type=$type, excluded=$excluded");
-        _updateNextTime(excluded);
+            "_updateNextTime try to reproduce, type=$type, excluded=$excluded, recur=$recur");
+        _updateNextTime(excluded, recur);
       } else {
-        print("_updateNextTime over, type=$type, _nextTime=$_nextTime");
+        print(
+            "_updateNextTime over, type=$type, _nextTime=$_nextTime, recur=$recur");
       }
     }
   }

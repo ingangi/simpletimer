@@ -103,6 +103,21 @@
             "excludeWeekDay":[6,7],
             "excludeDailyTime":["11:30:00", "13:00:00", "18:00:00", "09:30:00"],
             "excludePeriod":["2023-02-13 09:30:33", "2023-02-13 09:55:55"]
+        },
+
+        {
+            "id":8,
+            "title":"Impossible",
+            "desc":"",
+            "type":"daily",
+            "state":"normal",
+            "timerTime":"2023-01-01 18:30:33",
+            "setTime":"2023-01-01 08:35:33",
+            "weekDay":[],
+            "interval":0,
+            "excludeWeekDay":[6,7],
+            "excludeDailyTime":["11:30:00", "13:00:00", "18:00:00", "09:30:00"],
+            "excludePeriod":["2023-02-13 09:30:33", "2023-02-13 09:55:55"]
         }
     ]
 }
